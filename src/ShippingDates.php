@@ -8,8 +8,9 @@ namespace Jh\Shipping;
 class ShippingDates implements ShippingDatesInterface
 {
     const DAY_PROMISE = 3;
-    const NON_DELIVERY_DAYS = array(WeekDays::Saturday, WeekDays::Sunday);
-    const NON_DISPATCH_DAYS = array(WeekDays::Saturday, WeekDays::Sunday);
+    const DELIVERY_DAYS = array(WeekDays::Monday, WeekDays::Tuesday, WeekDays::Wednesday, WeekDays::Thursday, WeekDays::Friday);
+    const DISPATCH_DAYS = self::DELIVERY_DAYS;
+    
     /**
     * Method calculateDeliveryDate
     * @param orderDate
@@ -18,16 +19,15 @@ class ShippingDates implements ShippingDatesInterface
     public function calculateDeliveryDate(\DateTime $orderDate){
         $i = 0;
 
-        //If not a day in which dispatch can occur.
-        while(in_array($orderDate->format('w'), self::NON_DISPATCH_DAYS)){
+        //add to date until it can be dispatched.
+        while(!in_array($orderDate->format('w'), self::DISPATCH_DAYS)){
             $orderDate->modify("+1 day");
         }
-
-        //attempt delivery
+        //time to attempt delivery
         while( $i < self::DAY_PROMISE ){
             $orderDate->modify("+1 day");
             //if it is possible to deliver then add one to counter until 3 days has gone by
-            if( !(in_array($orderDate->format('w'), self::NON_DELIVERY_DAYS)) ){
+            if( in_array($orderDate->format('w'), self::DELIVERY_DAYS) ){
                 $i++;
             }
         }
